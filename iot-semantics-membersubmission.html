@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Functional Semantics for IoT Devices</title>
+    <style type="text/css">
+    .example {
+      display: block;
+      color: #222222;
+      background: #FCFCFC;
+      border-left-style: solid;
+      border-color: #c0c0c0;
+      border-left-width: 0.25em;
+      margin-left: 1em;
+      padding-left: 1em;
+      padding-top: 0.1em;
+      padding-bottom: 0.1em;
+    }
+    </style>
+
+    <link href="http://www.w3.org/StyleSheets/TR/W3C-Member-SUBM" rel="stylesheet"><!--[if lt IE 9]><script src='http://www.w3.org/2008/site/js/html5shiv.js'></script><![endif]--><!--[if lt IE 9]><script src='http://www.w3.org/2008/site/js/html5shiv.js'></script><![endif]--></head>
+  <body>
+    <div class="head">
+    <p>
+      <a href="http://www.w3.org/"><img height="48" width="72"
+        alt="W3C" src="http://www.w3.org/Icons/w3c_home" /></a> <a
+        href="http://www.w3.org/Submission/"> <img height="48"
+        width="211" alt="W3C Member Submission"
+        src="http://www.w3.org/Icons/member_subm" /></a>
+    </p>
+    <h1 id="title">Functional Semantics for IoT Devices</h1>
+    <h2 id="W3C-doctype">W3C Member Submission 13 April 2015</h2>
+
+    <dl>
+      <dt>This Version:</dt>
+      <dd>
+        <!-- <a href="http://www.w3.org/Submission/2014/SUBM-first-screen-paint-20140811/">http://www.w3.org/Submission/2014/SUBM-first-screen-paint-20140811/</a> -->
+      </dd>
+      <dt>Latest Version:</dt>
+      <dd>
+        <!-- <a href="http://www.w3.org/Submission/first-screen-paint/">http://www.w3.org/Submission/first-screen-paint/</a> -->
+      </dd>
+      <dt>Author:</dt>
+      <dd>Simon Mayer, Siemens</dd>
+      <dd>Ruben Verborgh, Ghent University</dd>
+      <dd>Matthias Kovatsch, ETH Zurich</dd>
+    </dl>
+
+    <p class="copyright">
+      Copyright &copy; Siemens 2015. This document is available under the <a href="http://www.w3.org/Consortium/Legal/copyright-documents">W3C Document License</a>. See the <a href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">W3C Intellectual Rights Notice and Legal Disclaimers</a> for additional information.
+    </p>
+  </div>
+
+  <hr>
+
+  <h2 id="abstract">Abstract</h2>
+  <div>
+
+<p>
+This document discusses an approach that combines semantic metadata and reasoning with a visual modeling tool to enable the goal-driven configuration of smart environments for end users. In contrast to process-driven systems where service mashups are statically defined, this approach makes use of embedded semantic API descriptions to dynamically create mashups that fulfill the user's goal. The main advantage of the presented system is its high degree of flexibility, as service mashups can adapt to dynamic environments and are fault-tolerant with respect to individual services becoming unavailable. To support end users in expressing their goals, we integrated a visual programming tool with our system. This tool enables users to model the desired state of their smart environment graphically and thus hides the technicalities of the underlying semantics and the reasoning. Possible applications of the presented system include the configuration of smart homes to increase individual well-being, and reconfigurations of smart environments, for instance in the industrial automation or healthcare domains.
+</p>
+
+<p>
+This document discusses an approach that enables end users to configure their smart environment at home, at the workplace, and at public places. Based on a user's desired goal state of his environment, a reasoning engine that has access to functional semantic metadata of services in the user's environment can infer whether or not it is possible to reach that goal, and outputs the HTTP requests that are necessary to do so.
+</p>
+
+
+  </div>
+  <h2 id="status">Status of This Document</h2>
+  <div>
+    <p>
+      <em>This section describes the status of this document at the
+        time of its publication. Other documents may supersede this
+        document. A list of current W3C publications can be found in the </em><a
+        href="http://www.w3.org/TR/"><i>W3C technical reports index</i></a><em>
+        at http://www.w3.org/TR/.</em>
+    </p>
+
+    <p>
+      By publishing this document, W3C acknowledges that the <a
+        href="http://www.w3.org/Submission/2014/04/">Submitting Members</a>
+      have made a formal Submission request to W3C for discussion.
+      Publication of this document by W3C indicates no endorsement of its
+      content by W3C, nor that W3C has, is, or will be allocating any
+      resources to the issues addressed by it. This document is not the
+      product of a chartered W3C group, but is published as potential input
+      to the <a href="http://www.w3.org/Consortium/Process">W3C Process</a>.
+      A <a href="http://www.w3.org/Submission/2014/04/Comment/">W3C
+        Team Comment</a> has been published in conjunction with this Member
+      Submission. Publication of acknowledged Member Submissions at the W3C
+      site is one of the benefits of <a
+        href="http://www.w3.org/Consortium/Prospectus/Joining">W3C
+        Membership</a>. Please consult the requirements associated with Member
+      Submissions of <a
+        href="http://www.w3.org/Consortium/Patent-Policy-20030520.html#sec-submissions">section
+        3.3 of the W3C Patent Policy</a>. Please consult the complete <a
+        href="http://www.w3.org/Submission">list of acknowledged W3C
+        Member Submissions</a>.
+    </p>
+  </div>
+
+  <h2 id="toc">Table of Contents</h2>
+  <div>
+    <ul>
+      <li class="toc">1. <a href="#intro">Introduction</a></li>
+      <li class="toc" style="margin-left: .5in">1.1 <a
+        href="#propertiesfunctions">Properties and Functions of IoT Devices</a>
+      </li>
+      <li class="toc">2. <a href="#description">Functional Semantics for IoT Devices</a>
+      </li>
+      <li class="toc" style="margin-left: .5in">2.1 <a
+        href="#iotsemantics">Describing Functional Properties of IoT Devices</a>
+      </li>
+      <li class="toc" style="margin-left: .5in">2.2 <a
+        href="#linkingdescriptions">Discovering Functional Semantic Metadata</a>
+      </li>
+      <li class="toc">3. <a href="#usecases">Use Cases</a>
+      </li>
+      <li class="toc" style="margin-left: .5in">3.1 <a
+        href="#smarthome">An Assistant for Configuring Smart Environments</a>
+      </li>
+      <li class="toc" style="margin-left: .5in">3.2 <a
+        href="#smartmanufacturing">Adaptive Processes in Industrial Manufacturing</a>
+      </li>
+    </ul>
+  </div>
+
+  <hr>
+
+  <h1 id="intro">1. Introduction</h1>
+
+<p>
+In environments that are populated by many heterogeneous smart things that can modify the users' environment (e.g., smart thermostats) or provide relevant contextual information (e.g., motion sensors), it is difficult for users to find and utilize services that provide the functionality they require. This is especially true when considering more complex user requirements that involve multiple co-operating devices within so-called physical mashups: composite applications that involve sensing or actuation of the physical world. Enabling owners of smart homes to create such mashups has been identified as an important domain in the field of ubiquitous computing research, and the easy configuration of smart environments is also gaining importance in the context of industrial automation in smart factories.
+</p>
+
+<p>
+In this document, we discuss a novel method to facilitate the composition of heterogeneous services for end users. We propose a <em>goal-driven</em> approach, meaning that we ask users to state which properties their smart environment should have (e.g., regarding their personal comfort, such as setting the ambient temperature). Given this statement of a user's goal, our system determines whether the goal can be reached given the set of available services, and also infers which user actions (i.e., HTTP requests in this case) are necessary to reach it. The user can then execute these requests and thereby modify his environment to reach the desired goal. Because service mashups are created at runtime from user goals, this approach can handle highly dynamic service environments.
+</p>
+
+<p>
+To find out whether the system can provide a mashup that achieves the user's goal, we require a way of determining what functionality the individual services provide and how to use them. To enable this, we suggest to combine semantic information about <em>what functionality</em> a service provides with a description of its REST program interface (i.e. of <em>how</em> it can be invoked by clients) and expose this data using metadata documents that are linked to the service URLs.
+</p>
+
+  <h2 id="propertiesfunctions">1.1 Properties and Functions of IoT Devices</h2>
+  <div>
+Dave asked us to include a paragraph about functional descriptions vs. describing properties of devices (e.g., <a href="http://www.w3.org/2005/Incubator/ssn/ssnx/ssn">SSN</a>)
+</div>
+
+  <hr>
+
+  <h1 id="description">2. Functional Semantics for IoT Devices</h1>
+
+<p>
+All services that we consider in this document feature Web APIs that are modeled according to the REST principles. While their protocol semantics are thus specified (e.g., by HTTP), we define their high-level domain semantics (i.e., which function a service can perform) using <a href="http://restdesc.org/">RESTdesc</a>, a machine-interpretable functional service description format for REST APIs. RESTdesc descriptions are expressed in <a href="http://www.w3.org/TeamSubmission/n3/">Notation3</a> (N3), an RDF superset that adds support for quantification. As for RDF/XML, the basic unit in N3 is the <em>triple</em> that is expressed in the format "<em>Subject Predicate Object.</em>"  RESTdesc descriptions are regular N3 implications and can be applied by any N3 reasoner without requiring special support. As an example to illustrate the main RESTdesc concepts, the following description of a Celsius-to-Fahrenheit converter communicates how the service can convert a Celsius temperature to the equivalent Fahrenheit temperature:
+</p>
+
+<p><div class="example"><pre>
+@prefix dbpedia: &lt;http://dbpedia.org/resource/#&gt;.
+@prefix ex: &lt;http://example.org/#&gt;.
+@prefix http: &lt;http://www.w3.org/2011/http#&gt;.
+
+{
+  ?tempC a dbpedia:Temperature; ex:hasValue ?cVal; ex:hasUnit "Celsius".
+}
+=&gt;
+{
+  _:tempF a dbpedia:Temperature; ex:hasValue ?fVal; ex:hasUnit "Fahrenheit"; owl:sameAs ?tempC.
+
+  _:request http:methodName "GET"; http:requestURI ("converter.net?temp=" ?cVal); http:resp [ http:body ?fVal ].
+}.
+</pre></div></p>
+
+<p>
+At the highest level, a RESTdesc description consists of three parts: preconditions, postconditions, and an HTTP request that realizes the postconditions from the preconditions. In the above example, the preconditions ("?tempC...") stipulate that a certain temperature expressed in degrees Celsius exists, and that this temperature has a specific value. The postconditions ("_:tempF...") warrant that there exists a~temperature expressed in degrees Fahrenheit that is the same as the Celsius temperature. Finally, the HTTP request ("_:request...") is a GET request to a URL determined by the Celsius value that returns the Fahrenheit value in the response body. This HTTP request is described by the <a href="http://www.w3.org/TR/HTTP-in-RDF10/">HTTP in RDF</a> vocabulary. In this example, the method name, request URI, and the body of the response are specified. When multiple predicate-object pairs are separated using semicolons, all of these pairs are associated to the leading subject. Note how N3 adds formulas (between curly braces) that group together triples, variables (starting with a question mark), and implications (triples where the predicate is "=>"). The <em>@prefix</em> declarations indicate which ontologies are used within the document.
+</p>
+
+<p>
+
+Given a reasoner that has access to the service description of the temperature converter, users can now formulate a goal to ask which Fahrenheit temperature is equivalent to 20&deg;C:
+
+<p><div class="example"><pre>
+:myTemp a dbpedia:Temperature; ex:hasValue "20"; ex:hasUnit "Celsius".
+
+_:convTemp ex:hasValue ?value; ex:hasUnit "Fahrenheit"; ex:sameAs :myTemp.
+</pre></div></p>
+
+  </div>
+
+<p>
+From this goal, a reasoner can instantiate the temperature conversion description that will indicate that the answer is given in the response body of an HTTP GET request to <em>http://converter.net?temp=20</em>. When a reasoner has access to multiple rules, it can <em>chain the implications</em> they contain and thereby find out how the client must co-ordinate invocations of different services that can <em>together</em> achieve the user goal. For instance, if the user wants to set a temperature of 20&deg;C in an environment that contains a smart thermostat that can only take inputs in degrees Fahrenheit, the reasoner will instruct it to first send an HTTP GET to the converter service, unpack the response body, and send the obtained temperature value (in degrees Fahrenheit) to the thermostat. The combination of RESTdesc descriptions with reasoning thus yields a powerful service composition mechanism. 
+</p>
+
+  <h2 id="iotsemantics">2.1 Describing Functional Properties of IoT Devices</h2>
+  <div>
+
+<p>
+The main issue when applying RESTdesc in IoT scenarios is that RESTdesc - being grounded in first-order logic - is not able to distinguish between mutually exclusive states of devices and their services. Therefore, while RESTdesc works very well for describing services that do not induce incompatible states such as the temperature converter in the previous example, already the most basic use cases that involve <em>stateful</em> objects cause problems regarding the soundness of the reasoning. As an example, assume that the system has access to the fact that a room has a temperature of 23&deg;C and the user sets the same room to 22&deg;C. This introduces a logical contradiction because the room cannot have two different temperatures at the same moment. We therefore propose an extension to RESTdesc that incorporates a mechanism that allows to explicitly describe states, in our case of smart environments and of the devices they contain. Furthermore, we introduced the concept of state transitions to enable the annotation of services that induce state changes. Consider the following RESTdesc description of a smart thermostat:
+</p>
+
+<p><div class="example"><pre>
+@prefix st: &lt;http://purl.org/restdesc/states#&gt;.
+@prefix log: &lt;http://www.w3.org/2000/10/swap/log#&gt;.
+@prefix dbpedia: &lt;http://dbpedia.org/resource/#&gt;.
+@prefix ex: &lt;http://example.org/#&gt;.
+@prefix http: &lt;http://www.w3.org/2011/http#&gt;.
+@prefix geonames: &lt;http://www.geonames.org/ontology#&gt;.
+
+{
+  ?newTemp a ex:Temperature; ex:hasValue ?fVal; ex:hasUnit "Fahrenheit".
+  ?thermostat a dbpedia:Thermostat; geonames:locatedIn ?place.
+  ?state a st:State; log:includes { ?place ex:hasTemp ?oldTemp. }.
+}
+=&gt;
+{
+  [ a st:StateChange; st:removed { ?place ex:hasTemp ?oldTemp. }; st:added { ?place ex:hasTemp ?newTemp. }; st:parent ?state ].
+  
+  _:request http:methodName "PUT"; http:requestURI (?thermostat); http:reqBody ?fVal.
+}.
+</pre></div></p>
+
+<p>
+From the antecedent of this rule, we can see that an execution of the service requires a temperature value in degrees Fahrenheit ("?newTemp...") as well as the presence of a device of type <em>Thermostat</em> at a specific location ("?thermostat..."). The preconditions furthermore contain a state description that specifies that the ambient temperature at the location of the thermostat is <em>?oldTemp</em> ("?state..."). From the consequent of the rule, we learn that an HTTP PUT request to the thermostat ("_:request...") will result in a state transition: the new state does not anymore include the <em>?place</em> having a temperature of <em>?oldTemp</em>, but rather includes the new fact that the temperature at the location of the thermostat is <em>?newTemp</em>. The semantics of state transitions are described in a publicly available <a href="http://notes.restdesc.org/2013/states.n3">states ontology</a> that can be looked up by reasoners for successful state handling. As an example, to set the ambient temperature at a specific location (http://example.org/Office) to 23&deg;C, a user would formulate the following goal:
+
+<p><div class="example"><pre>
+:temp23 a ex:Temperature; ex:hasValue "23"; ex:hasUnit "Celsius".
+
+?state a st:State; log:includes { http://example.org/Office ex:hasTemp :temp23. }.
+</pre></div></p>
+
+<p>
+In this goal, the user first defines the <em>temp23</em> constant that includes the desired temperature value in degrees Celsius. This entity is then used when defining the desired state of the location <em>Office</em>. This goal can be sent to a reasoner that will, in response, indicate that the goal state can be reached by first sending an HTTP GET request to the converter service to obtain the corresponding Fahrenheit value, and then send an HTTP PUT request to the URL of the thermostat at the location <em>http://example.org/Office</em> (given that it knows about that device). The URL of that thermostat is found at runtime because the functional service description shown before contains the precondition that the thermostat must be located at the correct location.
+</p>
+
+
+  </div>
+  <h2 id="linkingdescriptions">2.2 Discovering Functional Semantic Metadata</h2>
+  <div>
+
+<p>
+To be able to create service mashups, a system must of course have access to a means of discovering the individual services that are available in the current environment, as well as their functional descriptions. When implementing the ideas put forward in this document, we used a specialized search engine for for Web-enabled smart things to accomplish this and enabled the automated discovery of the descriptions using <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> headers as part of service responses to HTTP GET and OPTIONS requests. However, any search engine or repository that allows to browse or search for service endpoints can be used instead, such as the <a href="http://datatracker.ietf.org/doc/draft-ietf-core-resource-directory/">CoRE Resource Directory</a> when considering resource-constrained devices that support the CoAP protocol, or even industrial standards like UPnP.
+</p>
+
+<p><font color="red">
+The system furthermore requires access to a semantic reasoner that is able to infer the global structure of a physical mashup from the metadata provided by individual services. While it is possible to use a reasoner that is situated in the "cloud" for this task, we decided to instead use a local implementation in our prototype deployment because of the higher delays when using a remote reasoning instance, and privacy and security considerations: we consider the reasoner a "trusted entity" from the user's perspective, as it requires access to all service metadata. Moreover, the client eventually executes HTTP requests that were proposed by the reasoner. 
+</font></p>
+
+<p>
+In our implementation, the complete process works as follows: To access the individual service descriptions, our reasoner first does a look-up to find service entry URLs, using a special search engine or a CoRE resource directory. It then accesses these URLs using HTTP OPTIONS requests, follows the links that are returned within the <em>Link</em> header fields, and parses the N3 documents at these locations, thereby creating a local service catalog. When the user asks for a certain goal, the reasoner is invoked with the service descriptions from that catalog and the user's goal. Using backwards chaining, the reasoner then searches for a path from the current state to the goal state. If successful, it returns the necessary HTTP requests that are executed by the client to realize the goal.
+</p>
+
+  </div>
+
+  <hr>
+
+    <h1 id="usecases">3. Use Cases</h1>
+
+
+<p>
+This document describes how RESTdesc functional service descriptions can be used to describe any service that induces state transitions, and specifically to model smart environments. Our approach opens up a range of possibilities for automated service composition in home, office, and industrial scenarios, two of which are described in this section.
+</p>
+
+  <h2 id="smarthome">3.1 An Assistant for Configuring Smart Environments</h2>
+  <div>
+
+<p>
+A scenario that demonstrates the applicability of the proposed system in smart home environments is an application that automatically modifies smart environments to match end-user preferences. Using a handheld or wearable device such as a tablet computer, smartphone, or smartwatch, users can specify the song or radio station to be played in their environment and their comfort temperature, set ambient alarms in the environment, or adjust the lighting to match their preferred levels. This device then negotiates with the environment to adjust the specified parameters to the user's comfort settings and can also provide feedback to the user about whether the negotiations were successful. Given that devices are properly described and discoverable, the proposed approach enables this application to operate successfully in arbitrary environments, i.e. not only in the user's private home but also in an office environment, in hotel rooms, cars, and potentially also in public places. 
+</p>
+
+<p>
+This use case involves discoverable smart devices with proper service descriptions, a reasoner that can consume their functional descriptions and the user's goals, and a user interface (e.g., a smartphone or a Web application) that allows the user to configure his smart environment. Given a desired setting, the user interface is responsible of creating a user goal, sending it to the reasoner, and executing the requests that are proposed by the reasoner.
+</p>
+
+  </div>
+  <h2 id="smartmanufacturing">3.2 Adaptive Processes in Industrial Manufacturing</h2>
+  <div>
+
+<p>
+In an industrial context, machines or assembly lines could automatically adjust to support their current operator, and semantics could assist the rapid reconfiguration of manufacturing systems. Expand on this... the general direction is communicating manufacturing robots that can manufacture a product even if one of them becomes unavailable or is removed altogether.
+</p>
+
+<p>
+Similar to the first use case, this scenario involves discoverable smart devices with service descriptions, a reasoner, and a user interface.
+</p>
+
+
+  </div>
+
+  </body>
+</html>
+
