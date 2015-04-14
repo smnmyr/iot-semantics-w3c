@@ -43,6 +43,7 @@
       <dd>Simon Mayer, Siemens</dd>
       <dd>Ruben Verborgh, Ghent University</dd>
       <dd>Matthias Kovatsch, ETH Zurich</dd>
+      <dd>Dave Raggett, W3C</dd>
     </dl>
 
     <p class="copyright">
@@ -128,7 +129,7 @@ In environments that are populated by many heterogeneous smart things that can m
 </p>
 
 <p>
-In this document, we discuss a novel method to facilitate the composition of heterogeneous services for end users. We propose a <em>goal-driven</em> approach, meaning that we ask users to state which properties their smart environment should have (e.g., regarding their personal comfort, such as setting the ambient temperature). Given this statement of a user's goal, our system determines whether the goal can be reached given the set of available services, and also infers which user actions (i.e., HTTP requests in this case) are necessary to reach it. The user can then execute these requests and thereby modify his environment to reach the desired goal. Because service mashups are created at runtime from user goals, this approach can handle highly dynamic service environments.
+In this document, we discuss a novel method to facilitate the composition of heterogeneous services for end users. We propose a <em>goal-driven</em> approach, meaning that we ask users to state which properties their smart environment should have (e.g., regarding their personal comfort, such as setting the ambient temperature). Given this statement of a user's goal, the discussed system determines whether the goal can be reached given the set of available services, and also infers which user actions (i.e., HTTP requests in this case) are necessary to reach it. The user can then execute these requests and thereby modify his environment to reach the desired goal. Because service mashups are created at runtime from user goals, this approach can handle highly dynamic service environments.
 </p>
 
 <p>
@@ -137,7 +138,9 @@ To find out whether the system can provide a mashup that achieves the user's goa
 
   <h2 id="propertiesfunctions">1.1 Properties and Functions of IoT Devices</h2>
   <div>
-Dave asked us to include a paragraph about functional descriptions vs. describing properties of devices (e.g., <a href="http://www.w3.org/2005/Incubator/ssn/ssnx/ssn">SSN</a>)
+<p>
+In the approach discussed in this document, we explicitly target semantic descriptions of the <em>functionality of devices</em>. We view such functional descriptions as distinct from describing <em>device properties</em> - a few other projects target that aspect, most prominently the <a href="http://www.w3.org/2005/Incubator/ssn/ssnx/ssn">Semantic Sensor Network Ontology</a>. From our perspective, descriptions of device properties on the one hand and of their functionality on the other could complement each other when planning execution paths in smart environments: the purely functional planning could be covered by descriptions as discussed in this document, while the selection of devices according to non-functional aspects (e.g., what precision is required when dealing with a sensor) could be done using device property descriptions.
+</p>
 </div>
 
   <hr>
@@ -233,12 +236,17 @@ The disadvantage of using the described pattern is that the rule is only applica
 
 
 <p>
-From the antecedent of this rule, we can see that an execution of the service requires a temperature value in degrees Fahrenheit ("?newTemp...") as well as the presence of a device of type <em>Thermostat</em> at a specific location ("?thermostat..."). The preconditions furthermore contain a state description that specifies that the ambient temperature at the location of the thermostat is <em>?oldTemp</em> ("?state..."). From the consequent of the rule, we learn that an HTTP PUT request to the thermostat ("_:request...") will result in a state transition: the new state includes the fact that the temperature at the location of the thermostat is <em>?newTemp</em>. The semantics of state transitions are described in a publicly available <a href="http://notes.restdesc.org/2013/states.n3">states ontology</a> that can be looked up by reasoners for successful state handling. As an example, to set the ambient temperature at a specific location (http://example.org/Office) to 23&deg;C, a user would formulate the following goal:
+From the antecedent of this rule, we can see that an execution of the service requires a temperature value in degrees Fahrenheit ("?newTemp...") as well as the presence of a device of type <em>Thermostat</em> at a specific location ("?thermostat..."). The preconditions furthermore contain a state description that specifies that the ambient temperature at the location of the thermostat is <em>?oldTemp</em> ("?state..."). From the consequent of the rule, we learn that an HTTP PUT request to the thermostat ("_:request...") will result in a state transition: the new state includes the fact that the temperature at the location of the thermostat is <em>?newTemp</em>. The semantics of state transitions are described in a publicly available <a href="http://notes.restdesc.org/2013/states.n3">states ontology</a> that can be looked up by reasoners for successful state handling - for instance, that document defines the meaning of the "st:replaced" property: in the above example, all "ex:hasTemperature" relations of "?place" in a parent state ("?state") are replaced with the new object ("?newTemp"). 
+</p>
+
+<p>
+Given the above functional description, a user can now set the ambient temperature at a specific location (http://example.org/Office) to 23&deg;C by formulating the following goal:
+</p>
 
 <p><div class="example"><pre>
 :temp23 a ex:Temperature; ex:hasValue "23"; ex:hasUnit "Celsius".
 
-?state a st:State; log:includes { http://example.org/Office ex:hasTemp :temp23. }.
+?state a st:State; log:includes { http://example.org/Office ex:hasTemperature :temp23. }.
 </pre></div></p>
 
 <p>
@@ -264,7 +272,7 @@ In our implementation, the complete process works as follows: To access the indi
 
     <h1 id="constrained">3. Integration with Constrained Environments</h1>
   
-<font color="red">I think this part is too detailed - should we reframe constrained environments as a use case instead? (Simon)</font>
+<font color="red">Matthias, could you take care of connect this part more to the rest of the contribution? Else, I think it's cool: I talked to Dave about integration information about constrained environments and he's very interested. (Simon)</font>
 
 <p>
 A large number of IoT devices is expected to be resource-constrained. These devices usually connect wirelessly over low-power Wi-Fi or <a href="https://tools.ietf.org/html/rfc4944">6LoWPAN</a>. For the application layer, the <a href="http://tools.ietf.org/wg/core">Constrained RESTful Environments</a> (CoRE) working group at the <a href="http://www.ietf.org/">IETF</a> is defining a complete framework for resource-oriented IoT applications. At its center is the <a href="https://tools.ietf.org/html/rfc7252">Constrained Application Protocol</a> (CoAP), a RESTful protocol that allows for seamless integration of constrained IoT Devices into the Web. Like HTTP, CoAP uses URIs to address resources (using the <code>coap</code> scheme), Internet Media Types to transfer their state, and the powerful mechanisms for content negotiation and cache control. It supports the four basic methods GET, PUT, POST, and DELETE and response codes that were refined for machine-to-machine communication (e.g., explicit "Created", "Changed", and "Deleted" codes). Furthermore, CoAP is a compact binary protocol with low parsing complexity. It uses a datagram transport, that is, <a href="https://tools.ietf.org/html/rfc768">UDP</a> or <a href="http://tools.ietf.org/html/rfc6347">DTLS</a>. Using a CoAP-HTTP cross-proxy, requests and responses can be translated transparently between the two RESTful protocols. Yet there are further components in the CoRE framework to build an IoT ecosystem. 
@@ -300,6 +308,9 @@ Other devices and services can then use the RD for the efficient discovery of re
   
 <font color="red"><p>
 Not sure if required here. This is nice for pushing the physical state to the reasoner in real-time, but we do not talk about this (yet). However, it could be nice to inform "Big Web" people about this feature.
+</p>
+<p>
+The feature is cool - we should leave it in if we connect it to the rest of the document, else remove it or shorten it and inline it with 3.0. (Simon)
 </p></font>
 
 <p>
@@ -334,7 +345,7 @@ This use case involves discoverable smart devices with proper service descriptio
   <div>
 
 <p>
-In an industrial context, machines or assembly lines could automatically adjust to support their current operator, and semantics could assist the rapid reconfiguration of manufacturing systems. Expand on this... the general direction is communicating manufacturing robots that can manufacture a product even if one of them becomes unavailable or is removed altogether.
+In an industrial context, machines or assembly lines could automatically adjust to support their current operator, and semantics could assist the rapid reconfiguration of manufacturing systems. For instance, communicating manufacturing robots, conveyor belts, and other machines in a manufacturing environment can use the approach described here to plan how exactly a workable item should be processed. This would permit to automatically reconfigure the manufacturing process if a device becomes unavailable, new devices should be integrated in the process, or if non-functional parameters of the production process change.
 </p>
 
 <p>
