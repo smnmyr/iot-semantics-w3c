@@ -242,9 +242,6 @@ In this goal, the user first defines the <em>temp23</em> constant that includes 
 </p>
 
 
-<p>
-In our implementation, the complete process works as follows: To access the individual service descriptions, our reasoner first does a look-up to find service entry URIs, using a special search engine or a CoRE resource directory. It then accesses these URIs using HTTP OPTIONS requests, follows the links that are returned within the <em>Link</em> header fields, and parses the N3 documents at these locations, thereby creating a local service catalog. When the user asks for a certain goal, the reasoner is invoked with the service descriptions from that catalog and the user's goal. Using backwards chaining, the reasoner then searches for a path from the current state to the goal state. If successful, it returns the necessary HTTP requests that are executed by the client to realize the goal.
-</p>
 
 </div><hr><h1 id="constrained">3. Integration with Constrained Environments</h1>
 
@@ -303,6 +300,14 @@ There is a protocol extension that enables <a href="https://tools.ietf.org/html/
 
 
 <font color="red"><p>Story: The stuff needs to be discovered. We can use Web Linking for that</p></font>
+
+
+<font color="red"><p>Where could the following paragraph be useful?</p></font>
+
+<p>
+In our implementation, the complete process works as follows: To access the individual service descriptions, our reasoner first does a look-up to find service entry URIs, using a special search engine or a CoRE resource directory. It then accesses these URIs using HTTP OPTIONS requests, follows the links that are returned within the <em>Link</em> header fields, and parses the N3 documents at these locations, thereby creating a local service catalog. When the user asks for a certain goal, the reasoner is invoked with the service descriptions from that catalog and the user's goal. Using backwards chaining, the reasoner then searches for a path from the current state to the goal state. If successful, it returns the necessary HTTP requests that are executed by the client to realize the goal.
+</p>
+
 
 <p>
 To be able to create service mashups, a system must of course have access to a means of discovering the individual services that are available in the current environment, as well as their functional descriptions. When implementing the ideas put forward in this document, we used a specialized search engine for for Web-enabled smart things to accomplish this and enabled the automated discovery of the descriptions using <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> headers as part of service responses to HTTP GET and OPTIONS requests. 
