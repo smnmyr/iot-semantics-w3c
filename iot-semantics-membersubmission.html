@@ -172,11 +172,11 @@ All services that we consider in this document feature Web APIs that are modeled
 =&gt;
 {
   _:tempF a dbpedia:Temperature; ex:hasValue ?fVal; ex:hasUnit "Fahrenheit"; owl:sameAs ?tempC.
-
+<!-- modeled as an action result
   _:request http:methodName "POST"; http:requestURI "converter.example.com/cel2degf"; http:reqBody ?cVal; http:resp [ http:body ?fVal ].
-<!-- modeled as a cacheable lookup instead of action result --
+ modeled as a cacheable lookup -->
   _:request http:methodName "GET"; http:requestURI ("lookup.example.com/cel2degf?temp=" ?cVal); http:resp [ http:body ?fVal ].
--->}.
+}.
 </pre></div></p>
 
 <p>
@@ -246,10 +246,9 @@ In this goal, the user first defines the <em>temp23</em> constant that includes 
 </div><hr><h1 id="constrained">3. Integration with Constrained Environments</h1>
 
 
-<font color="red"><p>Story: Above, we use HTTP calls as examples. However, the WoT also involves lots of resource-constrained devices. Here's how we talk to these</p></font>
-
+<font color="red"><p>Story: Above, we use HTTP calls as examples. However, the WoT also involves lots of resource-constrained devices. Here's how we talk to these. And there's also a discovery mechanism with CoRE LF and RD. We'll use this later</p></font>
   
-<p><font color="red">Matthias, could you take care of connecting this part more to the rest of the contribution? Else, I think it's cool: I talked to Dave about integration information about constrained environments and he's very interested. (Simon)</font></p>
+<p><font color="red">Matthias, could you take care of connecting this part more to the rest of the contribution? For the Push notifications: I think we should remove that part if we don't use it anywhere else. If we keep it, we should refer to it from the 2nd paragraph of <a href="#discovery">Section 4</a> (Simon)</font></p>
 
 <p><font color="red">I think we need some restructuring for this (see e-mail). (Matthias)</font></p>
 
@@ -259,8 +258,6 @@ A large number of IoT devices is expected to be resource-constrained. These devi
 
 
 <h2 id="corediscovery">3.1 CoRE Link Format</h2><div>
-
-<font color="red"><p>Story: There's also a discovery mechanism with CoRE LF and RD. We'll use this later</p></font>
 
 <p>
 The <a href="http://tools.ietf.org/html/rfc6690">CoRE Link Format</a> extends <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> for IoT service discovery. The RFC defines an Internet Media Type (<code>application/link-format</code>) that allows to transfer a list of Web links together with link parameters such as relation-types or the supported content formats (media type together with encoding). Devices implementing the specification must provide a <a href="http://tools.ietf.org/html/rfc5785">well-known resource</a> for CoRE resource discovery at <code>/.well-known/core</code>. This way, other IoT devices can query the hosted of resource, either the complete list or filtered by attributes. For CoAP, this mechanism also works over IP multicast: Devices can send a GET request to the <a href="http://tools.ietf.org/html/rfc7252#section-12.8"><code>all-coap-nodes</code></a> multicast address to discover CoAP servers and directly filter for intended resources.
@@ -275,7 +272,7 @@ The CoRE Link Format can be used to discover the resources that provide the sema
 
 
 <p>
-In constrained environments, IoT devices might not be reachable all the time. Extensive multicast traffic als has negative impact on battery lifetimes. Thus, typical CoRE deployments make use of a <a href="https://tools.ietf.org/html/draft-ietf-core-resource-directory-02">resource directory</a> (RD). There, IoT devices register their CoRE Link Format after booting and joining the network. The RD address can either be configured during commissioning or discovered through a single multicast request when joining a new network. Devices also define a lifetime after which the registratation will be dropped. To confirm availability, devices need to update their registration before this timeout. The update mechanism can also be used to inform the RD about new resource (e.g., because a new dynamic resource was created or a new sensor was plugged into a modular device). If devices leave the network before their lifetime expires, they can also explicitly de-register.
+In constrained environments, IoT devices might not be reachable all the time. Extensive multicast traffic als has negative impact on battery lifetimes. Thus, typical CoRE deployments make use of a <a href="https://tools.ietf.org/html/draft-ietf-core-resource-directory-02">resource directory</a> (RD). There, IoT devices register their CoRE Link Format after booting and joining the network, which enables other devices and services to efficiently discover them through the RD lookup interface. The RD address can either be configured during commissioning or discovered through a single multicast request when joining a new network. Devices also define a lifetime after which the registration will be dropped. To confirm availability, devices need to update their registration before this timeout. The update mechanism can also be used to inform the RD about new resource (e.g., because a new dynamic resource was created or a new sensor was plugged into a modular device). If devices leave the network before their lifetime expires, they can also explicitly de-register.
 </p>
 
 
@@ -284,45 +281,29 @@ In constrained environments, IoT devices might not be reachable all the time. Ex
   
 <font color="red">
 <p>
-The feature is cool - we should leave it in if we connect it to the rest of the document, else remove it or shorten it and inline it with 3.0. (Simon)
-</p><p>
 I will keep it in for future versions of this document where we might need it ;). Will align after decision on restructuring. (Matthias)
 </p></font>
 
 <p>
-There is a protocol extension that enables <a href="https://tools.ietf.org/html/draft-ietf-core-observe-16">Observing Resources in CoAP</a>. By adding the <code>Observe</code> option to a GET request, client can signal the server that it wants to be informed about future state changes of the resource. When the option is supported by the server, it will reply with an <code>Observe</code> in the response. This turns the response into a notification and represents a promise that the server will push further notifications when the resource state changes. The mechanism relies on eventual consistency: all observers of a resource will eventually recieve the latest state of the resource at the origin server. This means that individual changes might be lost, either because of the lossiness of constrained networks or because of a debouncing process at the server when the resource changes too frequently. Hence, all updates need to be modelled as state and not as events. A door bell, for instance, would be modelled as a counter or a timestamp of the last press event---and not as a constant "pressed" event. The observe extension enables push notification for constrained RESTful environments and takes potential losses of real-world IoT systems into account at a conceptual level.
+CoAP furthermore features a protocol extension that enables <a href="https://tools.ietf.org/html/draft-ietf-core-observe-16">Observing Resources in CoAP</a>. By adding the <code>Observe</code> option to a GET request, client can signal the server that it wants to be informed about future state changes of the resource. When the option is supported by the server, it will reply with an <code>Observe</code> in the response. This turns the response into a notification and represents a promise that the server will push further notifications when the resource state changes. The mechanism relies on eventual consistency: all observers of a resource will eventually recieve the latest state of the resource at the origin server. This means that individual changes might be lost, either because of the lossiness of constrained networks or because of a debouncing process at the server when the resource changes too frequently. Hence, all updates need to be modelled as state and not as events. A door bell, for instance, would be modelled as a counter or a timestamp of the last press event---and not as a constant "pressed" event. The observe extension enables push notification for constrained RESTful environments and takes potential losses of real-world IoT systems into account at a conceptual level.
 </p>
 
 
   
-</div><hr><h1 id="usecases">4. Discovering Functional Semantic Metadata</h1>
+</div><hr><h1 id="discovery">4. Discovering Functional Semantic Metadata</h1>
 
 
 
-<font color="red"><p>Story: The stuff needs to be discovered. We can use Web Linking for that</p></font>
-
-
-<font color="red"><p>Where could the following paragraph be useful?</p></font>
+<font color="red"><p>Story: The stuff needs to be discovered. We can use Web Linking for that. In CoAP, we get to use the cool CoRE RD stuff</p></font>
 
 <p>
-In our implementation, the complete process works as follows: To access the individual service descriptions, our reasoner first does a look-up to find service entry URIs, using a special search engine or a CoRE resource directory. It then accesses these URIs using HTTP OPTIONS requests, follows the links that are returned within the <em>Link</em> header fields, and parses the N3 documents at these locations, thereby creating a local service catalog. When the user asks for a certain goal, the reasoner is invoked with the service descriptions from that catalog and the user's goal. Using backwards chaining, the reasoner then searches for a path from the current state to the goal state. If successful, it returns the necessary HTTP requests that are executed by the client to realize the goal.
+To be able to create service mashups on top of the proposed approach, a system must have access to a means of discovering the individual services that are available in the current environment, as well as their functional descriptions. Given device URLs, we propose to enable the automated discovery of their functional descriptions using <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> headers as part of service responses to REST requests (i.e., responses to GET and OPTIONS requests in an HTTP environment). In this way, the N3 descriptions that a device links to for describing its capabilities can be stored physically on the device or at a remote location where they are accessed and parsed by interested clients. For resource-constrained devices, the same functionality is provided via the CoRE Link Format, as described above. Additionally, clients in this domain can use a CoRE Resource Directory to discover the device URLs. In HTTP environments, different mechanisms can be used for obtaining this information, for instance proximity-based technologies (e.g., NFC, QR codes, BLE), local network discovery (e.g., UPnP, mDNS), or service directories.
 </p>
 
+<font color="red"><p>Story: This is how the entire thing now works together</p></font>
 
 <p>
-To be able to create service mashups, a system must of course have access to a means of discovering the individual services that are available in the current environment, as well as their functional descriptions. When implementing the ideas put forward in this document, we used a specialized search engine for for Web-enabled smart things to accomplish this and enabled the automated discovery of the descriptions using <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> headers as part of service responses to HTTP GET and OPTIONS requests. 
-</p>
-
-<font color="red"><p>Story: In CoAP, we get to use the cool CoRE RD stuff</p></font>
-
-<p>
-Other devices and services can then use the RD for the efficient discovery of resources through the RD lookup interface. A reasoner can leverage this to keep track of all the available devices in a way that is friendy for resource-constrained devices and networks. Whenever it discovers a new link with <code>rt="w3c.n3"</code> it can fetch and cache the N3 description locally.
-</p>
-
-<font color="red"><p>Story: In the end, we only need a mechanism to get to the URIs</p></font>
-
-<p>
-However, any search engine or repository that allows to browse or search for service endpoints can be used instead, such as the <a href="http://datatracker.ietf.org/doc/draft-ietf-core-resource-directory/">CoRE Resource Directory</a> when considering resource-constrained devices that support the CoAP protocol, or even industrial standards like UPnP.
+In our prototype implementation, the complete process works as follows: To access the individual service descriptions, our reasoner first does a look-up to find service entry URIs, using a special search engine or a CoRE Resource Directory. It then accesses these URIs, follows the returned Web Linking / Link Format links, and parses the N3 documents at these locations, thereby creating a local service catalog. The reasoner also leverages the CoRE RD to keep track of all available devices in a way that is friendly for resource-constrained devices and networks and updates its service catalogue whenever it discovers a new link to an N3 description. Now, whenever a client asks for a certain goal, the reasoner is invoked with the service descriptions from that catalog and the goal and searches for a path from the current state to the goal state. If successful, it returns the necessary requests to realize the goal &mdash; to do this, we use a proprietary format of conveying a list of REST requests (see <a href="#issues">Section 6</a>). The client then executes these requests to realize its goal.
 </p>
 
 
@@ -332,7 +313,7 @@ However, any search engine or repository that allows to browse or search for ser
 
 
 <p>
-This document describes how RESTdesc functional service descriptions can be used to describe any service that induces state transitions, and specifically to model smart environments in IoT scenarios. Our approach opens up a range of possibilities for automated service composition in home, office, and industrial scenarios, two of which are described in this section.
+This document describes how RESTdesc functional service descriptions can be used to describe any service that induces state transitions, and specifically to model smart environments in IoT scenarios. Our approach opens up a range of possibilities for automated service composition not only in the user's private home but also in an office environment, in hotel rooms, cars, and potentially also in public places (see <a href="smarthome">Section 5.1</a>). In an industrial context, machines or assembly lines could automatically adjust to support their current operator, and semantics could assist the rapid reconfiguration of manufacturing systems (see <a href="smartmanufacturing">Section 5.2</a>). Finally, such a system could be helpful in medical environments, for instance to increase the oxygen saturation to aid asthmatics, or could automatically configure monitor systems to support doctors during clinical diagnostics.
 </p>
 
 
@@ -351,23 +332,24 @@ This use case involves discoverable smart devices with proper service descriptio
 
 
 <p>
-In an industrial context, machines or assembly lines could automatically adjust to support their current operator, and semantics could assist the rapid reconfiguration of manufacturing systems. For instance, communicating manufacturing robots, conveyor belts, and other machines in a manufacturing environment can use the approach described here to plan how exactly a workable item should be processed. This would permit to automatically reconfigure the manufacturing process if a device becomes unavailable, new devices should be integrated in the process, or if non-functional parameters of the production process change.
+In an industrial context, machines or assembly lines could automatically adjust to support their current operator, and semantics could assist the rapid reconfiguration of manufacturing systems. For instance, communicating manufacturing robots, conveyor belts, and other machines in a manufacturing environment can use the approach described here to plan how exactly a workable item should be processed. This would permit to automatically reconfigure the manufacturing process if a device becomes unavailable or if new devices should be integrated in the process. It would also allow dynamically reacting to changes in non-functional parameters of the production process: for instance, the process could automatically change to accomodate goals such as "produce this part as quickly as possible" or "produce that part with as few CO2 emissions as possible."
 </p>
 
 <p>
-Similar to the first use case, this scenario involves discoverable smart devices with service descriptions, a reasoner, and a user interface.
+Similar to the first use case, this scenario involves discoverable smart devices with service descriptions, a reasoner, and a configuration and monitoring interface.
 </p>
 
 
 
 </div><hr><h1 id="issues">6. Open Issues</h1>
 
+We see the following immediate open issues before the discussed approach can be deployed more broadly:
 
-<p><ul>
+<p><ol>
 <li>A standard (and concise) <em>media type for REST execution plans</em>: our implementation uses a custom format for transmitting execution plans between the reasoner and its clients. Rather, it should be using a standard format for such plans, which could be based on the HTTP ontology.</li>
 
 <li>Agreed-upon <em>Web Linking relation types for the semantic descriptions</em></li>
-</ul></p>
+</ol></p>
 
 
 
@@ -376,10 +358,7 @@ Similar to the first use case, this scenario involves discoverable smart devices
 
   
 <p>
-<ul>
-<li>This submission is based on the paper <a href="http://www.vs.inf.ethz.ch/publ/bibtex.html?file=papers/mayersi-iot-2014">Configuration of Smart Environments Made Simple</a></li>
-<li>More information about RESTdesc can be found in the paper <a href="http://dl.acm.org/citation.cfm?id=2307828">Functional descriptions as the bridge between hypermedia APIs and the Semantic Web</a></li>
-</ul>
+This submission is based on the paper <a href="http://www.vs.inf.ethz.ch/publ/bibtex.html?file=papers/mayersi-iot-2014">Configuration of Smart Environments Made Simple</a>. More information about RESTdesc can be found in the paper <a href="http://dl.acm.org/citation.cfm?id=2307828">Functional descriptions as the bridge between hypermedia APIs and the Semantic Web</a>.
 </p>
 
 
