@@ -103,32 +103,23 @@ Dave, shouldn't these rather be nested &lt;ol&gt;s?<br/>
   
     <ul>
       <li class="toc">1. <a href="#intro">Introduction</a></li>
-      <li class="toc" style="margin-left: .5in">1.1 <a
-        href="#propertiesfunctions">Properties and Functions of IoT Devices</a>
-      </li>
-      <li class="toc">2. <a href="#description">Functional Semantics for IoT Devices</a>
-      </li>
-      <li class="toc" style="margin-left: .5in">2.1 <a
-        href="#wotsemantics">Describing Functional Properties of IoT Devices</a>
-      </li>
-      <li class="toc" style="margin-left: .5in">2.2 <a
-        href="#linkingdescriptions">Discovering Functional Semantic Metadata</a>
-      </li>
-      <li class="toc">3. <a href="#usecases">Use Cases</a>
-      </li>
-      <li class="toc" style="margin-left: .5in">3.1 <a
-        href="#smarthome">An Assistant for Configuring Smart Environments</a>
-      </li>
-      <li class="toc" style="margin-left: .5in">3.2 <a
-        href="#smartmanufacturing">Adaptive Processes in Industrial Manufacturing</a>
-      </li>
+      <li class="toc">2. <a href="#servicedescriptions">Functional Service Descriptions for WoT Devices</a></li>
+      <li class="toc" style="margin-left: .5in">2.1 <a href="#restsemantics">Functional Descriptions for REST Services</a></li>
+      <li class="toc" style="margin-left: .5in">2.2 <a href="#wotsemantics">Describing Functionalities of WoT Devices</a></li>
+      <li class="toc">3. <a href="#constrained">Integration with Constrained Environments</a></li>
+      <li class="toc" style="margin-left: .5in">3.1 <a href="#corelinkformat">CoRE Link Format</a></li>
+      <li class="toc" style="margin-left: .5in">3.2 <a href="#coredirectory">CoRE Resource Directory</a></li>
+      <li class="toc">4. <a href="#discovery">Discovering Functional Semantic Metadata</a></li>
+      <li class="toc">5. <a href="#usecases">Use Cases</a></li>
+      <li class="toc" style="margin-left: .5in">5.1 <a href="#smarthome">An Assistant for Configuring Smart Environments</a></li>
+      <li class="toc" style="margin-left: .5in">5.2 <a href="#smartmanufacturing">Adaptive Processes in Industrial Manufacturing</a></li>
+      <li class="toc">6. <a href="#issues">Open Issues</a></li>
+      <li class="toc">7. <a href="#references">Further Reading</a></li>
     </ul>
   </div>
 
-  <hr>
 
-  <h1 id="intro">1. Introduction</h1>
-
+<hr><h1 id="intro">1. Introduction</h1>
 <font color="red"><p>Story: We need to describe individual service offerings for composing higher-level application that involve heterogeneous WoT devices</p></font>
 
 <p>
@@ -143,19 +134,14 @@ In this document, we discuss a novel method to facilitate the composition of het
 To find out whether the system can provide a mashup that achieves the user's goal, we require a way of determining what functionality the individual services provide and how to use them. To enable this, we suggest to combine semantic information about <em>what functionality</em> a device provides with a description of its REST program interface (i.e., of <em>how</em> it can be invoked by clients) and expose this data using metadata documents that are linked to the service URIs. We thus explicitly target semantic descriptions of the <em>functionality of devices</em>. We view such functional descriptions as distinct from describing <em>device properties</em> - a few other projects target that aspect, most prominently the <a href="http://www.w3.org/2005/Incubator/ssn/ssnx/ssn">Semantic Sensor Network Ontology</a>. From our perspective, descriptions of device properties on the one hand and of their functionality on the other could complement each other when planning execution paths in smart environments: the purely functional planning could be covered by descriptions as discussed in this document, while the selection of devices according to non-functional aspects (e.g., what precision is required when dealing with a sensor) could be done using device property descriptions.
 </p>
 
-  <hr>
-
-<h1 id="description">2. Functional Service Descriptions for WoT Devices</h1>
-
+<hr><h1 id="servicedescriptions">2. Functional Service Descriptions for WoT Devices</h1>
 <font color="red"><p>Story: From service descriptions to WoT</p></font>
 
 In this section, we first briefly introduce RESTdesc, an approach to functionally describing REST services. Next, we discuss how this can be applied for describing device functions in Web of Things scenarios. For illustrative purposes, the example code shown in this section uses HTTP requests &mdash; however, our approach can also be applied to constrained devices that use the <a href="https://tools.ietf.org/html/rfc7252">Constrained Application Protocol</a> (CoAP; see <a href="#coap">Section 3</a> of this document).
 
-<h2 id="wotsemantics">2.1 Functional Descriptions for REST Services</h2><div>
 
-
+<h2 id="restsemantics">2.1 Functional Descriptions for REST Services</h2><div>
 <font color="red"><p>Story: Ruben has shown how to functionally describe REST services. Here's the brief version:</p></font>
-
 
 <p>
 All services that we consider in this document feature Web APIs that are modeled according to the REST principles. While their protocol semantics are thus specified (e.g., by HTTP), we define their high-level domain semantics (i.e., which function a service can perform) using <a href="http://restdesc.org/">RESTdesc</a>, a machine-interpretable functional service description format for REST APIs. RESTdesc descriptions are expressed in <a href="http://www.w3.org/TeamSubmission/n3/">Notation3</a> (N3), an RDF superset that adds support for quantification. As for RDF/XML, the basic unit in N3 is the <em>triple</em> that is expressed in the format "<em>Subject Predicate Object.</em>"  RESTdesc descriptions are regular N3 implications and can be applied by any N3 reasoner without requiring special support. As an example to illustrate the main RESTdesc concepts, the following description of a Celsius-to-Fahrenheit converter communicates how the service can convert a Celsius temperature to the equivalent Fahrenheit temperature:
@@ -199,10 +185,7 @@ From this goal, a reasoner can instantiate the temperature conversion descriptio
 
 
 </div><h2 id="iotsemantics">2.2 Describing Functionalities of WoT Devices</h2><div>
-
-
 <font color="red"><p>Story: With a tweak, this works for WoT Scenarios as well</p></font>
-
 
 <p>
 The main issue when applying RESTdesc in WoT scenarios is that RESTdesc &mdash; being grounded in first-order logic &mdash; is not able to distinguish between mutually exclusive states of devices and their services. Therefore, while RESTdesc works very well for describing services that do not induce incompatible states such as the temperature converter in the previous example, already the most basic use cases that involve <em>stateful</em> objects cause problems regarding the soundness of the reasoning. As an example, assume that the system has access to the fact that a room has a temperature of 23&deg;C and the user sets the same room to 22&deg;C. This introduces a logical contradiction because the room cannot have two different temperatures at the same moment. We therefore propose an extension to RESTdesc that incorporates a mechanism that allows to explicitly describe states, in our case of smart environments and of the devices they contain. Furthermore, we introduce the concept of state transitions to enable the annotation of services that induce state changes. Consider the following RESTdesc description of a smart thermostat:
@@ -221,7 +204,6 @@ The main issue when applying RESTdesc in WoT scenarios is that RESTdesc &mdash; 
   _:request http:methodName "PUT"; http:requestURI (?thermostat); http:reqBody ?fVal.
 }.
 </pre></div></p>
-
 
 <p>
 From the antecedent of this rule, we can see that an execution of the service requires a temperature value in degrees Fahrenheit ("?newTemp...") as well as the presence of a device of type <em>Thermostat</em> at a specific location ("?thermostat..."). The preconditions furthermore contain a state description that holds the ambient temperature at the location of the thermostat ("?state..."). From the consequent of the rule, we learn that an HTTP PUT request to the thermostat ("_:request...") will result in a state transition: the new state includes the fact that the temperature at the location of the thermostat is <em>?newTemp</em>. The semantics of state transitions are described in a publicly available <a href="http://notes.restdesc.org/2013/states.n3">states ontology</a> that can be looked up by reasoners for successful state handling. That document defines, for instance, the meaning of the "st:replaced" property: in the above example, all "ex:hasTemperature" relations of "?place" in a parent state ("?state") are replaced with the new object ("?newTemp"). The replace transition also covers the case when no previous state is defined in the descriptions.
@@ -244,8 +226,6 @@ In this goal, the user first defines the <em>temp23</em> constant that includes 
 
 
 </div><hr><h1 id="constrained">3. Integration with Constrained Environments</h1>
-
-
 <font color="red"><p>Story: Above, we use HTTP calls as examples. However, the WoT also involves lots of resource-constrained devices. Here's how we talk to these. And there's also a discovery mechanism with CoRE LF and RD. We'll use this later</p></font>
   
 <p><font color="red">Matthias, could you take care of connecting this part more to the rest of the contribution? For the Push notifications: I think we should remove that part if we don't use it anywhere else. If we keep it, we should refer to it from the 2nd paragraph of <a href="#discovery">Section 4</a> (Simon)</font></p>
@@ -257,7 +237,7 @@ A large number of IoT devices is expected to be resource-constrained. These devi
 </p>
 
 
-<h2 id="corediscovery">3.1 CoRE Link Format</h2><div>
+<h2 id="corelinkformat">3.1 CoRE Link Format</h2><div>
 
 <p>
 The <a href="http://tools.ietf.org/html/rfc6690">CoRE Link Format</a> extends <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> for IoT service discovery. The RFC defines an Internet Media Type (<code>application/link-format</code>) that allows to transfer a list of Web links together with link parameters such as relation-types or the supported content formats (media type together with encoding). Devices implementing the specification must provide a <a href="http://tools.ietf.org/html/rfc5785">well-known resource</a> for CoRE resource discovery at <code>/.well-known/core</code>. This way, other IoT devices can query the hosted of resource, either the complete list or filtered by attributes. For CoAP, this mechanism also works over IP multicast: Devices can send a GET request to the <a href="http://tools.ietf.org/html/rfc7252#section-12.8"><code>all-coap-nodes</code></a> multicast address to discover CoAP servers and directly filter for intended resources.
@@ -268,16 +248,14 @@ The CoRE Link Format can be used to discover the resources that provide the sema
 </p>
 
 
-</div><h2 id="corediscovery">3.2 CoRE Resource Directory</h2><div>
-
+</div><h2 id="coredirectory">3.2 CoRE Resource Directory</h2><div>
 
 <p>
 In constrained environments, IoT devices might not be reachable all the time. Extensive multicast traffic als has negative impact on battery lifetimes. Thus, typical CoRE deployments make use of a <a href="https://tools.ietf.org/html/draft-ietf-core-resource-directory-02">resource directory</a> (RD). There, IoT devices register their CoRE Link Format after booting and joining the network, which enables other devices and services to efficiently discover them through the RD lookup interface. The RD address can either be configured during commissioning or discovered through a single multicast request when joining a new network. Devices also define a lifetime after which the registration will be dropped. To confirm availability, devices need to update their registration before this timeout. The update mechanism can also be used to inform the RD about new resource (e.g., because a new dynamic resource was created or a new sensor was plugged into a modular device). If devices leave the network before their lifetime expires, they can also explicitly de-register.
 </p>
 
 
-</div><h2 id="corediscovery">3.3 Push Notifications</h2><div>
-
+</div><h2 id="corepush">3.3 Push Notifications</h2><div>
   
 <font color="red">
 <p>
@@ -291,8 +269,6 @@ CoAP furthermore features a protocol extension that enables <a href="https://too
 
   
 </div><hr><h1 id="discovery">4. Discovering Functional Semantic Metadata</h1>
-
-
 
 <font color="red"><p>Story: The stuff needs to be discovered. We can use Web Linking for that. In CoAP, we get to use the cool CoRE RD stuff</p></font>
 
@@ -309,8 +285,6 @@ In our prototype implementation, the complete process works as follows: To acces
 
 
 <hr><h1 id="usecases">5. Use Cases</h1>
-
-
 
 <p>
 This document describes how RESTdesc functional service descriptions can be used to describe any service that induces state transitions, and specifically to model smart environments in IoT scenarios. Our approach opens up a range of possibilities for automated service composition not only in the user's private home but also in an office environment, in hotel rooms, cars, and potentially also in public places (see <a href="smarthome">Section 5.1</a>). In an industrial context, machines or assembly lines could automatically adjust to support their current operator, and semantics could assist the rapid reconfiguration of manufacturing systems (see <a href="smartmanufacturing">Section 5.2</a>). Finally, such a system could be helpful in medical environments, for instance to increase the oxygen saturation to aid asthmatics, or could automatically configure monitor systems to support doctors during clinical diagnostics.
@@ -329,7 +303,6 @@ This use case involves discoverable smart devices with proper service descriptio
 
 
 </div><h2 id="smartmanufacturing">5.2 Adaptive Processes in Industrial Manufacturing</h2><div>
-
 
 <p>
 In an industrial context, machines or assembly lines could automatically adjust to support their current operator, and semantics could assist the rapid reconfiguration of manufacturing systems. For instance, communicating manufacturing robots, conveyor belts, and other machines in a manufacturing environment can use the approach described here to plan how exactly a workable item should be processed. This would permit to automatically reconfigure the manufacturing process if a device becomes unavailable or if new devices should be integrated in the process. It would also allow dynamically reacting to changes in non-functional parameters of the production process: for instance, the process could automatically change to accomodate goals such as "produce this part as quickly as possible" or "produce that part with as few CO2 emissions as possible."
@@ -353,15 +326,12 @@ We see the following immediate open issues before the discussed approach can be 
 
 
 
-<hr><h1 id="references">7. References</h1>
-
-
+<hr><h1 id="references">7. Further Reading</h1>
   
 <p>
 This submission is based on the paper <a href="http://www.vs.inf.ethz.ch/publ/bibtex.html?file=papers/mayersi-iot-2014">Configuration of Smart Environments Made Simple</a>. More information about RESTdesc can be found in the paper <a href="http://dl.acm.org/citation.cfm?id=2307828">Functional descriptions as the bridge between hypermedia APIs and the Semantic Web</a>.
 </p>
 
-
-  </body>
+</body>
 </html>
 
