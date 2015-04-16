@@ -137,7 +137,7 @@ To find out whether the system can provide a mashup that achieves the user's goa
 <hr><h1 id="servicedescriptions">2. Functional Service Descriptions for WoT Devices</h1>
 <font color="red"><p>Story: From service descriptions to WoT</p></font>
 
-In this section, we first briefly introduce RESTdesc, an approach to functionally describing REST services. Next, we discuss how this can be applied for describing device functions in Web of Things scenarios. For illustrative purposes, the example code shown in this section uses HTTP requests &mdash; however, our approach can also be applied to constrained devices that use the <a href="https://tools.ietf.org/html/rfc7252">Constrained Application Protocol</a> (CoAP; see <a href="#coap">Section 3</a> of this document).
+In this section, we first briefly introduce RESTdesc, an approach to functionally describing REST services. Next, we discuss how this can be applied for describing device functions in Web of Things scenarios. For illustrative purposes, the example code shown in this section uses HTTP requests &ndash; however, our approach can also be applied to constrained devices that use the <a href="https://tools.ietf.org/html/rfc7252">Constrained Application Protocol</a> (CoAP; see <a href="#coap">Section 3</a> of this document).
 
 
 <h2 id="restsemantics">2.1 Functional Descriptions for REST Services</h2><div>
@@ -226,63 +226,61 @@ In this goal, the user first defines the <em>temp23</em> constant that includes 
 
 
 </div><hr><h1 id="constrained">3. Integration with Constrained Environments</h1>
+
 <font color="red"><p>Story: Above, we use HTTP calls as examples. However, the WoT also involves lots of resource-constrained devices. Here's how we talk to these. And there's also a discovery mechanism with CoRE LF and RD. We'll use this later</p></font>
+
+<p>
+A large number of IoT devices is expected to be resource-constrained. These devices usually connect wirelessly over low-power Wi-Fi or <a href="https://tools.ietf.org/html/rfc4944">6LoWPAN</a>. To integrate such devices into the World Wide Web, the <a href="http://tools.ietf.org/wg/core">Constrained RESTful Environments</a> (CoRE) working group at the <a href="http://www.ietf.org/">IETF</a> is defining a complete application-layer framework for resource-oriented IoT applications. At its center is the <a href="https://tools.ietf.org/html/rfc7252">Constrained Application Protocol</a> (CoAP), a new Web protocol that was designed from scratch to apply the REST architectural style to low-power machine-to-machine communication. Like HTTP, CoAP uses URIs to address resources (using the <code>coap</code> scheme), Internet Media Types to transfer their state, and similar mechanisms for content negotiation and cache control. It supports the four basic methods GET, PUT, POST, and DELETE and response codes that were refined for machine-to-machine communication (e.g., explicit "Created", "Changed", and "Deleted" codes). Using a CoAP-HTTP cross-proxy, requests and responses can be translated transparently between the two RESTful protocols.
+</p>
+
+<p>
+CoAP is a compact, binary protocol with low parsing complexity, so it can easily be implemented on microcontroller-based platforms. Unlike low-power HTTP implementations that only mimic RESTful messages, CoAP implementations can provide the full feature set on constrained platforms. CoAP uses datagram transports such as <a href="https://tools.ietf.org/html/rfc768">UDP</a> or <a href="http://tools.ietf.org/html/rfc6347">DTLS</a> (or SMS when part of a cellular network). These also enable group communication over IP multicast: Clients are able to send a single request to a group of devices that provide similar resources. The canonical example is a light switch that controls multiple light bulbs. Yet there are additional components in the CoRE framework that enable a complete IoT ecosystem. 
+</p>
+
+<h2 id="corepush">3.1 Observing Resources</h2><div>
+
+<p>
+Real-time updates of sensed physical states are a central requirement for many IoT applications. For this, CoAP features a protocol extension that allows for push notifications through <a href="https://tools.ietf.org/html/draft-ietf-core-observe-16">Observing Resources in CoAP</a>. By adding the <code>Observe</code> option to a GET request, a client can signal the server that it wants to be informed about future state changes of the resource. When the option is supported by the server, it will reply with an <code>Observe</code> in the response. This turns the response into a notification and represents a promise that the server will push further notifications when the resource state changes. The mechanism relies on eventual consistency: all observers of a resource will eventually recieve the latest state of the resource at the origin server. This means that individual changes might be lost, either because of the lossiness of constrained networks or because of a debouncing process at the server when the resource changes too frequently for propagation. Hence, all updates need to be modelled as state and not as events. A door bell, for instance, would be modelled as a counter or a timestamp of the last press event &ndash; and not as a constant "pressed" event. This distinguishes CoAP Observe from publish-subscribe protocols such as MQTT. The Observe extension enables push notification for constrained RESTful environments and takes potential losses of real-world IoT systems into account at a conceptual level. It can be used to inform a reasoner of state changes within objects in real-time.
+</p>
+</div>
+
+<h2 id="corelinkformat">3.2 CoRE Link Format</h2><div>
+
+<p>
+IoT devices usually do not provide any user interfaces. Hence, the need to be able to discover fundamental services and entry links to applications on their own. The <a href="http://tools.ietf.org/html/rfc6690">CoRE Link Format</a> extends <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> for IoT service discovery. RFC&nbsp;6690 defines a new Internet Media Type (<code>application/link-format</code>) that allows to transfer a list of Web links together with link parameters such as relation-types or the supported content formats (i.e., media type together with its encoding). Devices implementing the specification must provide a <a href="http://tools.ietf.org/html/rfc5785">well-known resource</a> for CoRE resource discovery at <code>/.well-known/core</code>. This way, other IoT devices can query for the hosted resource, either a complete list or subsets filtered by attributes. For CoAP, this mechanism also works over IP multicast: Devices can send a GET request to the <a href="http://tools.ietf.org/html/rfc7252#section-12.8"><code>all-coap-nodes</code></a> multicast address to discover CoAP servers and directly filter for intended resources.
+</p>
+
+</div><h2 id="coredirectory">3.3 CoRE Resource Directory</h2><div>
+
+<p>
+In constrained environments, IoT devices might not be reachable all the time. Furthermore, extensive multicast traffic has negative impact on their battery lifetimes. Thus, typical CoRE deployments make use of a <a href="https://tools.ietf.org/html/draft-ietf-core-resource-directory-02">resource directory</a> (RD). Here, IoT devices register their CoRE Link Format with an RD after booting and joining the network through a RESTful interface. The idea behind this is to provide a mechanism that more efficient and explicit than crawling, since IoT environments are much more dynamic than the World Wide Web. The RD address can either be configured during commissioning or discovered through a single multicast request when joining a new network for the first time. Devices also define a lifetime after which the registration will be dropped. To confirm availability, devices need to update their registration before this timeout. The update mechanism can also be used to inform the RD about new resource (e.g., because a new dynamic resource was created or a new sensor was plugged into a modular device). If devices leave the network before their lifetime expires, they can also explicitly de-register.
+</p>
+
+<p>
+The RD will also provide a collection management interface to register links through commissioning tools and share links across different RDs, which can be part of different domains. To access the Web link collections, the RD provides a RESTful lookup interface that also supports query filters. It enables other IoT devices and services to efficiently discover resources within and across different domains, even when devices are corrently in sleep mode or otherwise disconnected from the network.
+</p>
   
-<p><font color="red">Matthias, could you take care of connecting this part more to the rest of the contribution? For the Push notifications: I think we should remove that part if we don't use it anywhere else. If we keep it, we should refer to it from the 2nd paragraph of <a href="#discovery">Section 4</a> (Simon)</font></p>
+</div>
 
-<p><font color="red">I think we need some restructuring for this (see e-mail). (Matthias)</font></p>
+<hr>
 
-<p>
-A large number of IoT devices is expected to be resource-constrained. These devices usually connect wirelessly over low-power Wi-Fi or <a href="https://tools.ietf.org/html/rfc4944">6LoWPAN</a>. For the application layer, the <a href="http://tools.ietf.org/wg/core">Constrained RESTful Environments</a> (CoRE) working group at the <a href="http://www.ietf.org/">IETF</a> is defining a complete framework for resource-oriented IoT applications. At its center is the <a href="https://tools.ietf.org/html/rfc7252">Constrained Application Protocol</a> (CoAP), a RESTful protocol that allows for seamless integration of constrained IoT Devices into the Web. Like HTTP, CoAP uses URIs to address resources (using the <code>coap</code> scheme), Internet Media Types to transfer their state, and the powerful mechanisms for content negotiation and cache control. It supports the four basic methods GET, PUT, POST, and DELETE and response codes that were refined for machine-to-machine communication (e.g., explicit "Created", "Changed", and "Deleted" codes). Furthermore, CoAP is a compact binary protocol with low parsing complexity. It uses a datagram transport, that is, <a href="https://tools.ietf.org/html/rfc768">UDP</a> or <a href="http://tools.ietf.org/html/rfc6347">DTLS</a>. Using a CoAP-HTTP cross-proxy, requests and responses can be translated transparently between the two RESTful protocols. Yet there are further components in the CoRE framework to build an IoT ecosystem. 
-</p>
-
-
-<h2 id="corelinkformat">3.1 CoRE Link Format</h2><div>
-
-<p>
-The <a href="http://tools.ietf.org/html/rfc6690">CoRE Link Format</a> extends <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> for IoT service discovery. The RFC defines an Internet Media Type (<code>application/link-format</code>) that allows to transfer a list of Web links together with link parameters such as relation-types or the supported content formats (media type together with encoding). Devices implementing the specification must provide a <a href="http://tools.ietf.org/html/rfc5785">well-known resource</a> for CoRE resource discovery at <code>/.well-known/core</code>. This way, other IoT devices can query the hosted of resource, either the complete list or filtered by attributes. For CoAP, this mechanism also works over IP multicast: Devices can send a GET request to the <a href="http://tools.ietf.org/html/rfc7252#section-12.8"><code>all-coap-nodes</code></a> multicast address to discover CoAP servers and directly filter for intended resources.
-</p>
-
-<p>
-The CoRE Link Format can be used to discover the resources that provide the semantic device descriptions through a registered resource type attribute (e.g., <code>rt="w3c.n3"</code>). This way, the reasoner can directly query for all the device descriptions in its environment. 
-</p>
-
-
-</div><h2 id="coredirectory">3.2 CoRE Resource Directory</h2><div>
-
-<p>
-In constrained environments, IoT devices might not be reachable all the time. Extensive multicast traffic als has negative impact on battery lifetimes. Thus, typical CoRE deployments make use of a <a href="https://tools.ietf.org/html/draft-ietf-core-resource-directory-02">resource directory</a> (RD). There, IoT devices register their CoRE Link Format after booting and joining the network, which enables other devices and services to efficiently discover them through the RD lookup interface. The RD address can either be configured during commissioning or discovered through a single multicast request when joining a new network. Devices also define a lifetime after which the registration will be dropped. To confirm availability, devices need to update their registration before this timeout. The update mechanism can also be used to inform the RD about new resource (e.g., because a new dynamic resource was created or a new sensor was plugged into a modular device). If devices leave the network before their lifetime expires, they can also explicitly de-register.
-</p>
-
-
-</div><h2 id="corepush">3.3 Push Notifications</h2><div>
-  
-<font color="red">
-<p>
-I will keep it in for future versions of this document where we might need it ;). Will align after decision on restructuring. (Matthias)
-</p></font>
-
-<p>
-CoAP furthermore features a protocol extension that enables <a href="https://tools.ietf.org/html/draft-ietf-core-observe-16">Observing Resources in CoAP</a>. By adding the <code>Observe</code> option to a GET request, client can signal the server that it wants to be informed about future state changes of the resource. When the option is supported by the server, it will reply with an <code>Observe</code> in the response. This turns the response into a notification and represents a promise that the server will push further notifications when the resource state changes. The mechanism relies on eventual consistency: all observers of a resource will eventually recieve the latest state of the resource at the origin server. This means that individual changes might be lost, either because of the lossiness of constrained networks or because of a debouncing process at the server when the resource changes too frequently. Hence, all updates need to be modelled as state and not as events. A door bell, for instance, would be modelled as a counter or a timestamp of the last press event---and not as a constant "pressed" event. The observe extension enables push notification for constrained RESTful environments and takes potential losses of real-world IoT systems into account at a conceptual level.
-</p>
-
-
-  
-</div><hr><h1 id="discovery">4. Discovering Functional Semantic Metadata</h1>
+<h1 id="discovery">4. Discovering Functional Semantic Metadata</h1>
 
 <font color="red"><p>Story: The stuff needs to be discovered. We can use Web Linking for that. In CoAP, we get to use the cool CoRE RD stuff</p></font>
 
 <p>
-To be able to create service mashups on top of the proposed approach, a system must have access to a means of discovering the individual services that are available in the current environment, as well as their functional descriptions. Given device URLs, we propose to enable the automated discovery of their functional descriptions using <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> headers as part of service responses to REST requests (i.e., responses to GET and OPTIONS requests in an HTTP environment). In this way, the N3 descriptions that a device links to for describing its capabilities can be stored physically on the device or at a remote location where they are accessed and parsed by interested clients. For resource-constrained devices, the same functionality is provided via the CoRE Link Format, as described above. Additionally, clients in this domain can use a CoRE Resource Directory to discover the device URLs. In HTTP environments, different mechanisms can be used for obtaining this information, for instance proximity-based technologies (e.g., NFC, QR codes, BLE), local network discovery (e.g., UPnP, mDNS), or service directories.
+To be able to create service mashups on top of the proposed approach, a system must have access to a means of discovering the individual services that are available in the current environment as well as their functional descriptions. Given device URIs, we propose to enable the automated discovery of their functional descriptions using <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> headers as part of service responses to REST requests (i.e., responses to GET and OPTIONS requests in an HTTP environment). In this way, the N3 descriptions of the device capabilities can be stored effectively on the device or at a remote location. Interested clients can transparently access and parse them either way.
+</p>
+
+<p>
+For powerful devices (e.g., rich clients like a smartphone), different mechanisms can be used for obtaining the metadata, for instance proximity-based technologies (e.g., NFC, QR codes, BLE), local network discovery (e.g., UPnP, mDNS), or service directories. For resource-constrained devices, the CoRE Link Format can be used to discover the resources that provide the semantic device descriptions through a registered resource type attribute (e.g., <code>rt="w3c.restdesc"</code>). This way, interested clients can directly query for all the device descriptions in their environment. The link can also contain an absolute URI that points to a remote location (e.g., <code>&lt;coap://manufacturer.example.com/restdesc/product-xy&gt;;rt="w3c.restdesc"</code>). When RESTdesc becomes a proper standard, it is also possible to register a new well-known resource such as <code>/.well-known/restdesc</code> to enable direct access to the metadata (i.e., the N3 documents).
 </p>
 
 <font color="red"><p>Story: This is how the entire thing now works together</p></font>
 
 <p>
-In our prototype implementation, the complete process works as follows: To access the individual service descriptions, our reasoner first does a look-up to find service entry URIs, using a special search engine or a CoRE Resource Directory. It then accesses these URIs, follows the returned Web Linking / Link Format links, and parses the N3 documents at these locations, thereby creating a local service catalog. The reasoner also leverages the CoRE RD to keep track of all available devices in a way that is friendly for resource-constrained devices and networks and updates its service catalogue whenever it discovers a new link to an N3 description. Now, whenever a client asks for a certain goal, the reasoner is invoked with the service descriptions from that catalog and the goal and searches for a path from the current state to the goal state. If successful, it returns the necessary requests to realize the goal &mdash; to do this, we use a proprietary format of conveying a list of REST requests (see <a href="#issues">Section 6</a>). The client then executes these requests to realize its goal.
+In our prototype implementation, the complete process works as follows: To access the individual service descriptions, our reasoner first does a look-up to find service entry URIs, using a special search engine or a CoRE Resource Directory. It then accesses these URIs, follows the returned Web Links, and parses the N3 documents at these locations, thereby creating a local service catalog. The reasoner also leverages the CoRE RD to keep track of all available devices in a way that is friendly for resource-constrained devices and networks. It updates its service catalogue whenever it discovers a new link to an N3 description or a device de-registered. Now, whenever a client asks for a certain goal, the reasoner is invoked with the service descriptions from that catalog and the goal, and searches for a path from the current state to the goal state. If successful, it returns the necessary requests to realize the goal. To do this, we use a proprietary format of conveying a list of REST requests (see <a href="#issues">Section 6</a>). The client then executes these requests to realize its goal.
 </p>
-
-
 
 <hr><h1 id="usecases">5. Use Cases</h1>
 
