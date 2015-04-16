@@ -107,8 +107,9 @@ Dave, shouldn't these rather be nested &lt;ol&gt;s?<br/>
       <li class="toc" style="margin-left: .5in">2.1 <a href="#restsemantics">Functional Descriptions for REST Services</a></li>
       <li class="toc" style="margin-left: .5in">2.2 <a href="#wotsemantics">Describing Functionalities of WoT Devices</a></li>
       <li class="toc">3. <a href="#constrained">Integration with Constrained Environments</a></li>
-      <li class="toc" style="margin-left: .5in">3.1 <a href="#corelinkformat">CoRE Link Format</a></li>
-      <li class="toc" style="margin-left: .5in">3.2 <a href="#coredirectory">CoRE Resource Directory</a></li>
+      <li class="toc" style="margin-left: .5in">3.1 <a href="#coapobserve">Observing Resources</a></li>
+      <li class="toc" style="margin-left: .5in">3.2 <a href="#corelinkformat">CoRE Link Format</a></li>
+      <li class="toc" style="margin-left: .5in">3.3 <a href="#coredirectory">CoRE Resource Directory</a></li>
       <li class="toc">4. <a href="#discovery">Discovering Functional Semantic Metadata</a></li>
       <li class="toc">5. <a href="#usecases">Use Cases</a></li>
       <li class="toc" style="margin-left: .5in">5.1 <a href="#smarthome">An Assistant for Configuring Smart Environments</a></li>
@@ -237,7 +238,7 @@ A large number of IoT devices is expected to be resource-constrained. These devi
 CoAP is a compact, binary protocol with low parsing complexity, so it can easily be implemented on microcontroller-based platforms. Unlike low-power HTTP implementations that only mimic RESTful messages, CoAP implementations can provide the full feature set on constrained platforms. CoAP uses datagram transports such as <a href="https://tools.ietf.org/html/rfc768">UDP</a> or <a href="http://tools.ietf.org/html/rfc6347">DTLS</a> (or SMS when part of a cellular network). These also enable group communication over IP multicast: Clients are able to send a single request to a group of devices that provide similar resources. The canonical example is a light switch that controls multiple light bulbs. Yet there are additional components in the CoRE framework that enable a complete IoT ecosystem. 
 </p>
 
-<h2 id="corepush">3.1 Observing Resources</h2><div>
+<h2 id="coapobserve">3.1 Observing Resources</h2><div>
 
 <p>
 Real-time updates of sensed physical states are a central requirement for many IoT applications. For this, CoAP features a protocol extension that allows for push notifications through <a href="https://tools.ietf.org/html/draft-ietf-core-observe-16">Observing Resources in CoAP</a>. By adding the <code>Observe</code> option to a GET request, a client can signal the server that it wants to be informed about future state changes of the resource. When the option is supported by the server, it will reply with an <code>Observe</code> in the response. This turns the response into a notification and represents a promise that the server will push further notifications when the resource state changes. The mechanism relies on eventual consistency: all observers of a resource will eventually recieve the latest state of the resource at the origin server. This means that individual changes might be lost, either because of the lossiness of constrained networks or because of a debouncing process at the server when the resource changes too frequently for propagation. Hence, all updates need to be modelled as state and not as events. A door bell, for instance, would be modelled as a counter or a timestamp of the last press event &ndash; and not as a constant "pressed" event. This distinguishes CoAP Observe from publish-subscribe protocols such as MQTT. The Observe extension enables push notification for constrained RESTful environments and takes potential losses of real-world IoT systems into account at a conceptual level. It can be used to inform a reasoner of state changes within objects in real-time.
