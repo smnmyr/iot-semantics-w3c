@@ -28,7 +28,7 @@
         src="http://www.w3.org/Icons/member_subm" /></a>
     </p>
     <h1 id="title">Functional Semantics for WoT Devices</h1>
-    <h2 id="W3C-doctype">W3C Member Submission 13 April 2015</h2>
+    <h2 id="W3C-doctype">W3C Member Submission 20 May 2015</h2>
 
     <dl>
       <dt>This Version:</dt>
@@ -43,7 +43,6 @@
       <dd>Simon Mayer, Siemens</dd>
       <dd>Ruben Verborgh, Ghent University</dd>
       <dd>Matthias Kovatsch, ETH Zurich</dd>
-      <dd>Dave Raggett, W3C</dd>
     </dl>
 
     <p class="copyright">
@@ -96,11 +95,7 @@ This document presents an approach that enables end users to configure devices i
 
   <h2 id="toc">Table of Contents</h2>
   <div>
-  
-<font color="red"><p>
-Dave, shouldn't these rather be nested &lt;ol&gt;s?<br/>
-</p></font>
-  
+    
     <ul>
       <li class="toc">1. <a href="#intro">Introduction</a></li>
       <li class="toc">2. <a href="#servicedescriptions">Functional Service Descriptions for WoT Devices</a></li>
@@ -121,7 +116,7 @@ Dave, shouldn't these rather be nested &lt;ol&gt;s?<br/>
 
 
 <hr><h1 id="intro">1. Introduction</h1>
-<font color="red"><p>Story: We need to describe individual service offerings for composing higher-level application that involve heterogeneous WoT devices</p></font>
+<!-- <font color="red"><p>Story: We need to describe individual service offerings for composing higher-level application that involve heterogeneous WoT devices</p></font> -->
 
 <p>
 In environments that are populated by many heterogeneous smart things that can modify the users' environment (e.g., smart thermostats) or provide relevant contextual information (e.g., motion sensors), it is difficult for users to find and utilize services that provide the functionality they require. This is especially true when considering more complex user requirements that involve multiple cooperating devices within so-called physical mashups: composite applications that involve sensing or actuation of the physical world. Enabling owners of smart homes to create such mashups has been identified as an important domain in the field of ubiquitous computing research, and the easy configuration of smart environments is also gaining importance in the context of industrial automation in smart factories.
@@ -136,13 +131,13 @@ To find out whether the system can provide a mashup that achieves the user's goa
 </p>
 
 <hr><h1 id="servicedescriptions">2. Functional Service Descriptions for WoT Devices</h1>
-<font color="red"><p>Story: From service descriptions to WoT</p></font>
+<!-- <font color="red"><p>Story: From service descriptions to WoT</p></font> -->
 
 In this section, we first briefly introduce RESTdesc, an approach to functionally describing REST services. Next, we discuss how this can be applied for describing device functions in Web of Things scenarios. For illustrative purposes, the example code shown in this section uses HTTP requests &ndash; however, our approach can also be applied to constrained devices that use the <a href="https://tools.ietf.org/html/rfc7252">Constrained Application Protocol</a> (CoAP; see <a href="#coap">Section 3</a> of this document).
 
 
 <h2 id="restsemantics">2.1 Functional Descriptions for REST Services</h2><div>
-<font color="red"><p>Story: Ruben has shown how to functionally describe REST services. Here's the brief version:</p></font>
+<!-- <font color="red"><p>Story: Ruben has shown how to functionally describe REST services. Here's the brief version:</p></font> -->
 
 <p>
 All services that we consider in this document feature Web APIs that are modeled according to the REST principles. While their protocol semantics are thus specified (e.g., by HTTP), we define their high-level domain semantics (i.e., which function a service can perform) using <a href="http://restdesc.org/">RESTdesc</a>, a machine-interpretable functional service description format for REST APIs. RESTdesc descriptions are expressed in <a href="http://www.w3.org/TeamSubmission/n3/">Notation3</a> (N3), an RDF superset that adds support for quantification. As for RDF/XML, the basic unit in N3 is the <em>triple</em> that is expressed in the format "<em>Subject Predicate Object.</em>"  RESTdesc descriptions are regular N3 implications and can be applied by any N3 reasoner without requiring special support. As an example to illustrate the main RESTdesc concepts, the following description of a Celsius-to-Fahrenheit converter communicates how the service can convert a Celsius temperature to the equivalent Fahrenheit temperature:
@@ -186,7 +181,7 @@ From this goal, a reasoner can instantiate the temperature conversion descriptio
 
 
 </div><h2 id="iotsemantics">2.2 Describing Functionalities of WoT Devices</h2><div>
-<font color="red"><p>Story: With a tweak, this works for WoT Scenarios as well</p></font>
+<!-- <font color="red"><p>Story: With a tweak, this works for WoT Scenarios as well</p></font> -->
 
 <p>
 The main issue when applying RESTdesc in WoT scenarios is that RESTdesc &mdash; being grounded in first-order logic &mdash; is not able to distinguish between mutually exclusive states of devices and their services. Therefore, while RESTdesc works very well for describing services that do not induce incompatible states such as the temperature converter in the previous example, already the most basic use cases that involve <em>stateful</em> objects cause problems regarding the soundness of the reasoning. As an example, assume that the system has access to the fact that a room has a temperature of 23&deg;C and the user sets the same room to 22&deg;C. This introduces a logical contradiction because the room cannot have two different temperatures at the same moment. We therefore propose an extension to RESTdesc that incorporates a mechanism that allows to explicitly describe states, in our case of smart environments and of the devices they contain. Furthermore, we introduce the concept of state transitions to enable the annotation of services that induce state changes. Consider the following RESTdesc description of a smart thermostat:
@@ -228,7 +223,7 @@ In this goal, the user first defines the <em>temp23</em> constant that includes 
 
 </div><hr><h1 id="constrained">3. Integration with Constrained Environments</h1>
 
-<font color="red"><p>Story: Above, we use HTTP calls as examples. However, the WoT also involves lots of resource-constrained devices. Here's how we talk to these. And there's also a discovery mechanism with CoRE LF and RD. We'll use this later</p></font>
+<!-- <font color="red"><p>Story: Above, we use HTTP calls as examples. However, the WoT also involves lots of resource-constrained devices. Here's how we talk to these. And there's also a discovery mechanism with CoRE LF and RD. We'll use this later</p></font> -->
 
 <p>
 A large number of WoT devices is expected to be resource-constrained. These devices usually connect wirelessly over low-power Wi-Fi or <a href="https://tools.ietf.org/html/rfc4944">6LoWPAN</a>. To integrate such devices into the World Wide Web, the <a href="http://tools.ietf.org/wg/core">Constrained RESTful Environments</a> (CoRE) working group at the <a href="http://www.ietf.org/">IETF</a> is defining a complete application-layer framework for resource-oriented IoT applications (i.e., WoT applications). At its center is the <a href="https://tools.ietf.org/html/rfc7252">Constrained Application Protocol</a> (CoAP), a new Web protocol that was designed from scratch to apply the REST architectural style to low-power machine-to-machine communication. Like HTTP, CoAP uses URIs to address resources (using the <code>coap</code> scheme), Internet Media Types to transfer their state, and similar mechanisms for content negotiation and cache control. It supports the four basic methods GET, PUT, POST, and DELETE and response codes that were refined for machine-to-machine communication (e.g., explicit "Created", "Changed", and "Deleted" codes). Using a CoAP-HTTP cross-proxy, requests and responses can be translated transparently between the two RESTful protocols.
@@ -267,7 +262,7 @@ The RD will also provide a collection management interface to register links thr
 
 <h1 id="discovery">4. Discovering Functional Semantic Metadata</h1>
 
-<font color="red"><p>Story: The stuff needs to be discovered. We can use Web Linking for that. In CoAP, we get to use the cool CoRE RD stuff</p></font>
+<!-- <font color="red"><p>Story: The stuff needs to be discovered. We can use Web Linking for that. In CoAP, we get to use the cool CoRE RD stuff</p></font> -->
 
 <p>
 To be able to create service mashups on top of the proposed approach, a system must have access to a means of discovering the individual services that are available in the current environment as well as their functional descriptions. Given device URIs, we propose to enable the automated discovery of their functional descriptions using <a href="http://tools.ietf.org/html/rfc5988">Web Linking</a> headers as part of service responses to REST requests (i.e., responses to GET and OPTIONS requests in an HTTP environment). In this way, the N3 descriptions of the device capabilities can be stored effectively on the device or at a remote location. Interested clients can transparently access and parse them either way.
@@ -277,7 +272,7 @@ To be able to create service mashups on top of the proposed approach, a system m
 For powerful devices (e.g., rich clients like a smartphone), different mechanisms can be used for obtaining the metadata, for instance proximity-based technologies (e.g., NFC, QR codes, BLE), local network discovery (e.g., UPnP, mDNS), or service directories. For resource-constrained devices, the CoRE Link Format can be used to discover the resources that provide the semantic device descriptions through a registered resource type attribute (e.g., <code>rt="w3c.restdesc"</code>). This way, interested clients can directly query for all the device descriptions in their environment. The link can also contain an absolute URI that points to a remote location (e.g., <code>&lt;coap://manufacturer.example.com/restdesc/product-xy&gt;;rt="w3c.restdesc"</code>). When RESTdesc becomes a proper standard, it is also possible to register a new well-known resource such as <code>/.well-known/restdesc</code> to enable direct access to the metadata (i.e., the N3 documents).
 </p>
 
-<font color="red"><p>Story: This is how the entire thing now works together</p></font>
+<!-- <font color="red"><p>Story: This is how the entire thing now works together</p></font> -->
 
 <p>
 In our prototype implementation, the complete process works as follows: To access the individual service descriptions, our reasoner first does a look-up to find service entry URIs, using a special search engine or a CoRE Resource Directory. It then accesses these URIs, follows the returned Web Links, and parses the N3 documents at these locations, thereby creating a local service catalog. The reasoner also leverages the CoRE RD to keep track of all available devices in a way that is friendly for resource-constrained devices and networks. It updates its service catalogue whenever it discovers a new link to an N3 description or a device de-registered. Now, whenever a client asks for a certain goal, the reasoner is invoked with the service descriptions from that catalog and the goal, and searches for a path from the current state to the goal state. If successful, it returns the necessary requests to realize the goal. To do this, we use a proprietary format of conveying a list of REST requests (see <a href="#issues">Section 6</a>). The client then executes these requests to realize its goal.
